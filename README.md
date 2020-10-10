@@ -1,6 +1,6 @@
-# Pangu Chart
+# Chart-Pangu
 
-**Pangu Chart** is a helm chart template which inherits from the default template, but brings many conveniences originated from our daily devops.
+**Chart Pangu** is a helm chart template which inherits from the default template, but brings many conveniences originated from our daily devops.
 You can safely use it as the starting point of your helm chart since it is well tested.
 
 > Pangu is the first living being and the creator of all in some versions of Chinese mythology[<sup>1</sup>](#refer-pangu).
