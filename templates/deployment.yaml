@@ -27,18 +27,30 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         date: {{ now | date "20060102150405" | quote }}
     spec:
-{{- if .Values.persistence }}
+      {{- if .Values.persistence }}
       volumes:
-          {{- toYaml .Values.persistence.volumes | nindent 8 }}
-{{- end }}
+        {{- range .Values.persistence.volumes }}
+        - name: {{ .name }}
+          persistentVolumeClaim:
+            claimName: {{ .claimName }}
+        {{- end }}
+      {{- end }}
       imagePullSecrets:
         - name: regcred
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.persistence }}
           volumeMounts:
-            {{- toYaml .Values.persistence.volumeMounts | nindent 12 }}
+            {{- range .Values.persistence.volumes }}
+            {{- if .mountPath }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              readOnly: {{ .readOnly }}
+            {{- end }}
+            {{- end }}
+          {{- end }}
         {{- if .Values.command }}
           command:
           {{- toYaml .Values.command | nindent 10 }}
