@@ -35,7 +35,7 @@ spec:
 {{- end }}
   rules:
   {{- $paths := .Values.ingress.paths -}}
-  {{- range .Values.ingress.hosts }}
+  {{- range $host := .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
@@ -43,7 +43,7 @@ spec:
           - path: {{ . }}
             backend:
               serviceName: {{ $fullName }}
-              servicePort: http
+              servicePort: {{ default "http" $host.servicePort }}
         {{- end }}
   {{- end }}
 {{- end }}
