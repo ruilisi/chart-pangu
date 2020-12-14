@@ -47,7 +47,7 @@ spec:
             {{- if .mountPath }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
-              readOnly: {{ .readOnly }}
+              readOnly: {{ default true .readOnly }}
             {{- end }}
             {{- end }}
           {{- end }}
