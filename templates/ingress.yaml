@@ -1,6 +1,11 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "myChart.fullname" . -}}
+{{- $isNetworkingV1 := semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
+{{- if $isNetworkingV1 }}
+apiVersion: networking.k8s.io/v1
+{{- else -}}
 apiVersion: extensions/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -35,15 +40,27 @@ spec:
 {{- end }}
   rules:
   {{- $paths := .Values.ingress.paths -}}
+  {{- $pathType := default "ImplementationSpecific" .Values.ingress.pathType -}}
   {{- range $host := .Values.ingress.hosts }}
+  {{- $port := default 80 $host.servicePort }}
     - host: {{ .host | quote }}
       http:
         paths:
         {{- range (or .paths $paths) }}
-          - path: {{ . }}
-            backend:
-              serviceName: {{ $fullName }}
-              servicePort: {{ default "http" $host.servicePort }}
+        {{ if $isNetworkingV1 -}}
+        - backend:
+            service:
+              name: {{ $fullName }}
+              port:
+                number: {{ $port }}
+          path: {{ . }}
+          pathType: {{ $pathType }}
+        {{- else -}}
+        - path: {{ . }}
+          backend:
+            serviceName: {{ $fullName }}
+            servicePort: {{ $port }}
+        {{- end -}}
         {{- end }}
   {{- end }}
 {{- end }}
